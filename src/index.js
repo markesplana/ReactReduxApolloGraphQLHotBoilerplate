@@ -8,7 +8,6 @@ import store from './store'
 import routes from './routes'
 import client from './apolloClient'
 
-
 const render = () => {
   ReactDOM.render(
     (

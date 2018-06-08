@@ -2,25 +2,10 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { Header } from 'components'
 import { renderRoutes } from 'react-router-config'
-
+import 'antd/dist/antd.css'
 
 const App = ({ route }) => (
   <div>
-    <Header
-      title="Boilerplate"
-      links={[
-        {
-          id: 1,
-          label: 'Redux Counter',
-          href: '/counter',
-        },
-        {
-          id: 2,
-          label: 'GraphQl Blog',
-          href: '/posts',
-        },
-      ]}
-    />
     {renderRoutes(route.routes)}
   </div>
 )

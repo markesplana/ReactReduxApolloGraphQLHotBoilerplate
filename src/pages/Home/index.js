@@ -1,47 +1,134 @@
 import React from 'react'
-import styled from 'styled-components'
+import PropTypes from 'prop-types'
+import { Link } from 'react-router-dom'
+import { compose } from 'recompose'
+import { graphql, withApollo } from 'react-apollo'
 import { Grid, PageHeader } from 'react-bootstrap'
-import DummyImage from './dummy.png'
+import { showSpinnerWhileApolloLoading, showApolloError, showNoData } from 'common/helpers'
+import { GET_MEMBERS, CREATE_MEMBER, REMOVED_MEMBER, UPDATE_SCORE, UPDATE_ACTIVE } from 'modules/home/qql'
+import Turntable from 'modules/home/components/Turntable'
+import _ from 'lodash'
 
 
-const StyledImage = styled.img`
-  width: 100%;
-  max-width: 128rem;
-`
+class HomePage extends React.PureComponent{
+  constructor(props){
+    super(props)
+    this.state = {
 
-const HomePage = () => (
-  <Grid>
-    <PageHeader>React Redux Apollo GraphQL Hot Boilerplate 2.0</PageHeader>
-    <p>
-      Updated version of the old apollo graphql boilerplate. This one is cleaner and functional. I
-      used boilerplate code from my
-      <a href="https://github.com/developer239/workbox-webpack-react"> workbox-webpack-react </a>
-      but I got rid of the PWA aspects
-      because
-      progressive websites are little bit confusing for new developers.
-    </p>
-    <p>
-      You can find the source code
-      <a href="https://github.com/developer239/ReactReduxApolloGraphQLHotBoilerplate"> here</a>.
-    </p>
-    <h4>Major Updates</h4>
-    <h5>Dependencies:</h5>
-    <ul>
-      <li>functional programming with Recompose 0.26.0</li>
-      <li>React Apollo 2.0.2</li>
-      <li>React 16.1.0</li>
-      <li>React Router 4.2.2</li>
-      <li>Redux 3.7.2</li>
-      <li>Webpack 3.8.1</li>
-      <li>Styled Components 2.2.3</li>
-    </ul>
-    <h5>Scripts:</h5>
-    <ul>
-      <li><i>prod</i> runs on express and is heroku ready</li>
-      <li><i>dev</i> also runs on express and is heroku ready</li>
-    </ul>
-    <StyledImage src={DummyImage} alt="dummy" />
-  </Grid>
+    }
+    
+    this.handleDelete = this.handleDelete.bind(this)
+    this.AddMember = this.AddMember.bind(this)
+    this.updateScore = this.updateScore.bind(this)
+    this.updateActive = this.updateActive.bind(this)
+  }
+
+
+  handleDelete(id){
+    this.props.client.mutate({
+      mutation: REMOVED_MEMBER,
+      variables: {
+        id
+      },
+      refetchQueries:[{
+        query: GET_MEMBERS
+      }]
+    })
+    .then((res) => {
+      console.log(res)
+    })
+  }
+
+  updateScore(name){
+   
+    const { allMemberses } = this.props.data
+    const filterMember = _.filter(allMemberses, function(o){
+      return o.name == name
+    })
+   
+    const newScore = filterMember[0].score + 1
+
+    console.log("name", filterMember)
+    this.props.client.mutate({
+      mutation: UPDATE_SCORE,
+      variables: {
+        id: filterMember[0].id,
+        score: newScore
+      },
+      refetchQueries:[{
+        query: GET_MEMBERS
+      }]
+    })
+    .then((res) => {
+      console.log(res)
+    })
+  }
+
+  updateActive(id, active){
+    console.log(active)
+    this.props.client.mutate({
+      mutation: UPDATE_ACTIVE,
+      variables: {
+        id,
+        active: active
+      },
+      refetchQueries:[{
+        query: GET_MEMBERS
+      }]
+    })
+    .then((res) => {
+      console.log(res)
+    })
+  }
+
+
+  AddMember(name){
+    this.props.client.mutate({
+       mutation: CREATE_MEMBER,
+       variables: {
+         name,
+         score: 0
+       },
+       refetchQueries:[{
+         query: GET_MEMBERS
+       }]
+    })
+    .then((res) => {
+      console.log(res)
+    })
+  }
+
+
+  
+  render(){
+    const { allMemberses } = this.props.data
+    console.log(this.props)
+
+   
+    return(
+      <div>
+      <Grid>
+        <Turntable 
+          updateActive={this.updateActive}
+          updateScore={this.updateScore}
+          handleDelete={this.handleDelete}
+          AddMember={this.AddMember} 
+          members={allMemberses} />
+      </Grid>
+      </div>
+    )
+  }
+
+}
+
+
+const enhance = compose(
+  withApollo,
+  graphql(GET_MEMBERS),
+  showApolloError(),
+  showSpinnerWhileApolloLoading(),
+  showNoData(props => !props.data.allMemberses)('There are no member in database.'),
 )
 
-export default HomePage
+
+export default enhance(HomePage)
