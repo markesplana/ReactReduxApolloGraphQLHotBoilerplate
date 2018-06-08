@@ -17,10 +17,15 @@
     "e2e": "nightwatch",
     "e2e:download": "node nightwatch.conf.js"
   },
-  "babel": {
-    "presets": [
-      "es2015"
-    ]
+  "babel": { 
+    "presets": [ 
+      [
+        "env", { 
+        "targets": { 
+          "node": "current" 
+          } 
+        }] 
+      ] 
   },
   "engines": {
     "node": "6.11.0"
