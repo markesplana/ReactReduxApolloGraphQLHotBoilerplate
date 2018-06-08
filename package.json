@@ -22,6 +22,9 @@
       "es2015"
     ]
   },
+  "engines": {
+    "node": "4.1.1"
+  },
   "dependencies": {
     "antd": "^3.6.1",
     "apollo-cache-inmemory": "^1.1.0",
